@@ -334,6 +334,13 @@
 
     .show-cta:hover { background: var(--pink); color: var(--white); }
 
+    .shows-loading,
+    .shows-empty {
+      padding: 40px 0;
+      color: var(--gray);
+      font-size: .9rem;
+    }
+
     /* ─── BIOGRAPHIE ─── */
     #biographie { background: var(--black); }
 
@@ -871,38 +878,8 @@
       <div style="position:absolute;inset:0;background:linear-gradient(to right, rgba(10,10,10,.0) 50%, rgba(10,10,10,.0) 100%);"></div>
     </div>
 
-    <div class="show-list">
-      <div class="show-item">
-        <div class="show-date">
-          <div class="day">10</div>
-          <div class="month-year">Avr 2026</div>
-        </div>
-        <div class="show-info">
-          <h3>Frileux — Rodage de nouveau matériel</h3>
-          <div class="show-meta">
-            <span>BoulZeye, Montréal</span>
-            <span>20 h 00</span>
-            <span>Nouveau matériel</span>
-          </div>
-        </div>
-        <a href="https://www.epasslive.com/detail-de-l-evenement/frileux-par-alex-roof-50d9" target="_blank" rel="noopener" class="show-cta">Billets &rarr;</a>
-      </div>
-
-      <div class="show-item">
-        <div class="show-date">
-          <div class="day">07</div>
-          <div class="month-year">Mai 2026</div>
-        </div>
-        <div class="show-info">
-          <h3>Frileux — Rodage de nouveau matériel</h3>
-          <div class="show-meta">
-            <span>BoulZeye, Montréal</span>
-            <span>20 h 00</span>
-            <span>Nouveau matériel</span>
-          </div>
-        </div>
-        <a href="https://www.epasslive.com/detail-de-l-evenement/frileux-par-alex-roof-cea2" target="_blank" rel="noopener" class="show-cta">Billets &rarr;</a>
-      </div>
+    <div class="show-list" id="shows-container">
+      <div class="shows-loading">Chargement…</div>
     </div>
   </section>
 
@@ -1113,6 +1090,71 @@
       <li><a href="#contact">Contact</a></li>
     </ul>
   </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    // ── SPECTACLES (Supabase) ──────────────────────────────
+    (async () => {
+      const SUPABASE_URL = 'https://oddpgftcwplcxqieqqiy.supabase.co';
+      const SUPABASE_KEY = 'sb_publishable_fxSM1Iq8SkDXrIujJ4KKTQ_QDyjPD1K';
+      const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+      const MONTHS = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+
+      function esc(str) {
+        return String(str ?? '')
+          .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+          .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+      const container = document.getElementById('shows-container');
+
+      try {
+        const { data: shows, error } = await db
+          .from('shows')
+          .select('*')
+          .gte('show_date', today)
+          .order('show_date', { ascending: true });
+
+        if (error) throw error;
+
+        if (!shows || shows.length === 0) {
+          container.innerHTML = '<p class="shows-empty">Aucune date à venir pour le moment — restez à l\'écoute !</p>';
+          return;
+        }
+
+        container.innerHTML = shows.map(s => {
+          const [y, m, d]    = s.show_date.split('-');
+          const day          = parseInt(d).toString().padStart(2, '0');
+          const monthYear    = `${MONTHS[parseInt(m)-1]} ${y}`;
+          const [hh, mm]     = s.show_time.split(':');
+          const timeStr      = `${hh} h ${mm}`;
+          const metaItems    = [s.venue, timeStr, s.notes].filter(Boolean);
+          const metaHTML     = metaItems.map(v => `<span>${esc(v)}</span>`).join('');
+          const ctaHTML      = s.ticket_url
+            ? `<a href="${esc(s.ticket_url)}" target="_blank" rel="noopener" class="show-cta">Billets &rarr;</a>`
+            : '';
+          return `
+            <div class="show-item">
+              <div class="show-date">
+                <div class="day">${day}</div>
+                <div class="month-year">${monthYear}</div>
+              </div>
+              <div class="show-info">
+                <h3>${esc(s.title)}</h3>
+                <div class="show-meta">${metaHTML}</div>
+              </div>
+              ${ctaHTML}
+            </div>`;
+        }).join('');
+
+      } catch (err) {
+        console.error('Erreur chargement spectacles :', err);
+        container.innerHTML = '<p class="shows-empty">Impossible de charger les spectacles.</p>';
+      }
+    })();
+  </script>
 
   <script>
     // Nav

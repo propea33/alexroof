@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Alex Roof</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:     #0a0a0a;
+      --bg2:    #111111;
+      --bg3:    #1a1a1a;
+      --white:  #f0f0f0;
+      --gray:   #888;
+      --gray2:  #444;
+      --border: rgba(255,255,255,.08);
+      --pink:   #e8165a;
+      --pink2:  #ff4d85;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--white);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* ─── LOGIN ─── */
+    #login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .login-card { width: 100%; max-width: 340px; }
+
+    .login-eyebrow {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--pink);
+      margin-bottom: 28px;
+    }
+
+    .login-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -.5px;
+      margin-bottom: 32px;
+    }
+
+    .field { margin-bottom: 14px; }
+
+    .field label {
+      display: block;
+      font-size: .68rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-bottom: 7px;
+    }
+
+    .field input,
+    .field textarea {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 11px 13px;
+      color: var(--white);
+      font-family: inherit;
+      font-size: .88rem;
+      outline: none;
+      transition: border-color .2s;
+      -webkit-appearance: none;
+    }
+
+    .field input:focus,
+    .field textarea:focus { border-color: var(--pink); }
+
+    .field textarea { resize: vertical; min-height: 72px; }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .field-hint {
+      font-size: .72rem;
+      color: var(--gray2);
+      margin-top: 5px;
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: var(--pink);
+      border: none;
+      border-radius: 6px;
+      padding: 12px;
+      color: #fff;
+      font-family: inherit;
+      font-size: .88rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: background .2s;
+    }
+
+    .btn-primary:hover { background: var(--pink2); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+
+    .error-msg {
+      font-size: .8rem;
+      color: #ff7096;
+      margin-top: 10px;
+      min-height: 18px;
+    }
+
+    /* ─── ADMIN ─── */
+    #admin-screen { display: none; }
+
+    .admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .admin-logo {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--pink);
+    }
+
+    .btn-logout {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 6px 14px;
+      color: var(--gray);
+      font-family: inherit;
+      font-size: .75rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color .2s, color .2s;
+    }
+
+    .btn-logout:hover { border-color: rgba(255,255,255,.25); color: var(--white); }
+
+    .admin-body {
+      padding: 40px;
+      max-width: 960px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .section-label {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gray);
+    }
+
+    .btn-add {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--pink);
+      border: none;
+      border-radius: 6px;
+      padding: 8px 16px;
+      color: #fff;
+      font-family: inherit;
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    .btn-add:hover { background: var(--pink2); }
+
+    /* ─── TABLE ─── */
+    .shows-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 52px;
+    }
+
+    .shows-table th {
+      text-align: left;
+      font-size: .62rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--gray2);
+      padding: 0 20px 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .shows-table td {
+      padding: 15px 20px 15px 0;
+      font-size: .86rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .col-date  { font-weight: 700; color: var(--pink); white-space: nowrap; }
+    .col-title { font-weight: 500; }
+    .col-venue { color: var(--gray); font-size: .8rem; }
+    .col-time  { color: var(--gray); font-size: .8rem; white-space: nowrap; }
+
+    .col-ticket a {
+      color: var(--pink);
+      font-size: .78rem;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .col-ticket a:hover { text-decoration: underline; }
+
+    .row-actions { display: flex; gap: 7px; white-space: nowrap; }
+
+    .btn-edit, .btn-del {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 5px 11px;
+      font-family: inherit;
+      font-size: .74rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color .2s, color .2s, background .2s;
+    }
+
+    .btn-edit { color: var(--white); }
+    .btn-edit:hover { border-color: rgba(255,255,255,.3); }
+
+    .btn-del { color: #ff7096; }
+    .btn-del:hover { border-color: #ff7096; background: rgba(255,112,150,.07); }
+
+    .empty-row td {
+      padding: 28px 0;
+      color: var(--gray2);
+      font-size: .82rem;
+      border-bottom: none;
+      font-style: italic;
+    }
+
+    /* ─── MODAL ─── */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.78);
+      z-index: 50;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .overlay.open { display: flex; }
+
+    .modal {
+      background: var(--bg2);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 12px;
+      padding: 32px;
+      width: 100%;
+      max-width: 460px;
+    }
+
+    .modal-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .btn-cancel {
+      flex: 1;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px;
+      color: var(--gray);
+      font-family: inherit;
+      font-size: .86rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color .2s;
+    }
+    .btn-cancel:hover { border-color: rgba(255,255,255,.2); }
+
+    .btn-save {
+      flex: 2;
+      background: var(--pink);
+      border: none;
+      border-radius: 6px;
+      padding: 10px;
+      color: #fff;
+      font-family: inherit;
+      font-size: .86rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-save:hover { background: var(--pink2); }
+    .btn-save:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ─── CONFIRM DELETE ─── */
+    .confirm-card {
+      background: var(--bg2);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 12px;
+      padding: 32px;
+      width: 100%;
+      max-width: 340px;
+      text-align: center;
+    }
+
+    .confirm-card p {
+      color: var(--gray);
+      font-size: .86rem;
+      margin: 10px 0 24px;
+      line-height: 1.6;
+    }
+
+    .confirm-card strong { color: var(--white); }
+
+    .btn-danger {
+      flex: 1;
+      background: #b91c3a;
+      border: none;
+      border-radius: 6px;
+      padding: 10px;
+      color: #fff;
+      font-family: inherit;
+      font-size: .86rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-danger:hover { background: #d42044; }
+  </style>
+</head>
+<body>
+
+  <!-- ══ LOGIN ══ -->
+  <div id="login-screen">
+    <div class="login-card">
+      <div class="login-eyebrow">Alex Roof · Admin</div>
+      <h1 class="login-title">Connexion</h1>
+      <div class="field">
+        <label>Courriel</label>
+        <input type="email" id="inp-email" placeholder="info@alexroof.ca" autocomplete="email" />
+      </div>
+      <div class="field">
+        <label>Mot de passe</label>
+        <input type="password" id="inp-password" placeholder="••••••••••" autocomplete="current-password" />
+      </div>
+      <button class="btn-primary" id="btn-login">Se connecter</button>
+      <div class="error-msg" id="login-error"></div>
+    </div>
+  </div>
+
+  <!-- ══ ADMIN ══ -->
+  <div id="admin-screen">
+    <header class="admin-header">
+      <div class="admin-logo">Alex Roof · Admin</div>
+      <button class="btn-logout" id="btn-logout">Déconnexion</button>
+    </header>
+    <main class="admin-body">
+
+      <!-- À venir -->
+      <div class="section-head">
+        <div class="section-label">Spectacles à venir</div>
+        <button class="btn-add" id="btn-add">+ Ajouter un spectacle</button>
+      </div>
+      <table class="shows-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Titre</th>
+            <th>Salle</th>
+            <th>Heure</th>
+            <th>Billets</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="body-upcoming"></tbody>
+      </table>
+
+      <!-- Passés -->
+      <div class="section-head" style="margin-top:8px;">
+        <div class="section-label">Spectacles passés</div>
+      </div>
+      <table class="shows-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Titre</th>
+            <th>Salle</th>
+            <th>Heure</th>
+            <th>Billets</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="body-past"></tbody>
+      </table>
+
+    </main>
+  </div>
+
+  <!-- ══ MODAL ADD / EDIT ══ -->
+  <div class="overlay" id="modal-overlay">
+    <div class="modal">
+      <div class="modal-title" id="modal-title">Ajouter un spectacle</div>
+      <div class="field">
+        <label>Titre du spectacle</label>
+        <input type="text" id="f-title" placeholder="ex : Frileux — Rodage de nouveau matériel" />
+      </div>
+      <div class="field">
+        <label>Salle / Lieu</label>
+        <input type="text" id="f-venue" placeholder="ex : BoulZeye, Montréal" />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Date</label>
+          <input type="date" id="f-date" />
+        </div>
+        <div class="field">
+          <label>Heure</label>
+          <input type="time" id="f-time" />
+        </div>
+      </div>
+      <div class="field">
+        <label>URL des billets</label>
+        <input type="url" id="f-ticket" placeholder="https://..." />
+        <div class="field-hint">Optionnel</div>
+      </div>
+      <div class="field">
+        <label>Note</label>
+        <input type="text" id="f-notes" placeholder="ex : Nouveau matériel" />
+        <div class="field-hint">Optionnel — apparaît sous les infos du spectacle</div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="btn-modal-cancel">Annuler</button>
+        <button class="btn-save" id="btn-modal-save">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CONFIRM DELETE ══ -->
+  <div class="overlay" id="confirm-overlay">
+    <div class="confirm-card">
+      <div class="modal-title">Supprimer ?</div>
+      <p>Ce spectacle sera <strong>définitivement supprimé</strong>.<br />Cette action est irréversible.</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="btn-confirm-cancel">Annuler</button>
+        <button class="btn-danger" id="btn-confirm-delete">Supprimer</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    const SUPABASE_URL = 'https://oddpgftcwplcxqieqqiy.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_fxSM1Iq8SkDXrIujJ4KKTQ_QDyjPD1K';
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const MONTHS = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+
+    function esc(str) {
+      return String(str ?? '')
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function fmtDate(d) {
+      const [y,m,day] = d.split('-');
+      return `${parseInt(day)} ${MONTHS[parseInt(m)-1]} ${y}`;
+    }
+
+    function fmtTime(t) {
+      const [h,m] = t.split(':');
+      return `${h} h ${m}`;
+    }
+
+    function today() { return new Date().toISOString().split('T')[0]; }
+
+    // ── STATE ──────────────────────────────────────────────
+    let shows = [];
+    let editingId  = null;
+    let deletingId = null;
+
+    // ── DOM REFS ───────────────────────────────────────────
+    const loginScreen   = document.getElementById('login-screen');
+    const adminScreen   = document.getElementById('admin-screen');
+    const loginError    = document.getElementById('login-error');
+    const bodyUpcoming  = document.getElementById('body-upcoming');
+    const bodyPast      = document.getElementById('body-past');
+    const modalOverlay  = document.getElementById('modal-overlay');
+    const confirmOverlay= document.getElementById('confirm-overlay');
+
+    // ── AUTH ───────────────────────────────────────────────
+    (async () => {
+      const { data: { session } } = await db.auth.getSession();
+      if (session) enterAdmin();
+    })();
+
+    document.getElementById('btn-login').addEventListener('click', async () => {
+      const email    = document.getElementById('inp-email').value.trim();
+      const password = document.getElementById('inp-password').value;
+      loginError.textContent = '';
+      const btn = document.getElementById('btn-login');
+      btn.disabled = true;
+      btn.textContent = 'Connexion…';
+      const { error } = await db.auth.signInWithPassword({ email, password });
+      btn.disabled = false;
+      btn.textContent = 'Se connecter';
+      if (error) { loginError.textContent = 'Identifiants incorrects.'; return; }
+      enterAdmin();
+    });
+
+    document.getElementById('inp-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-login').click();
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', async () => {
+      await db.auth.signOut();
+      adminScreen.style.display = 'none';
+      loginScreen.style.display = 'flex';
+    });
+
+    function enterAdmin() {
+      loginScreen.style.display = 'none';
+      adminScreen.style.display = 'block';
+      loadShows();
+    }
+
+    // ── LOAD & RENDER ──────────────────────────────────────
+    async function loadShows() {
+      const { data, error } = await db.from('shows').select('*').order('show_date', { ascending: true });
+      if (error) { console.error(error); return; }
+      shows = data ?? [];
+      renderShows();
+    }
+
+    function renderShows() {
+      const t = today();
+      const upcoming = shows.filter(s => s.show_date >= t);
+      const past     = shows.filter(s => s.show_date < t).reverse();
+
+      bodyUpcoming.innerHTML = upcoming.length
+        ? upcoming.map(rowHTML).join('')
+        : '<tr class="empty-row"><td colspan="6">Aucun spectacle à venir</td></tr>';
+
+      bodyPast.innerHTML = past.length
+        ? past.map(rowHTML).join('')
+        : '<tr class="empty-row"><td colspan="6">Aucun spectacle passé</td></tr>';
+    }
+
+    function rowHTML(s) {
+      const ticket = s.ticket_url
+        ? `<a href="${esc(s.ticket_url)}" target="_blank" rel="noopener">Voir</a>`
+        : '—';
+      return `
+        <tr>
+          <td class="col-date">${fmtDate(s.show_date)}</td>
+          <td class="col-title">${esc(s.title)}</td>
+          <td class="col-venue">${esc(s.venue)}</td>
+          <td class="col-time">${fmtTime(s.show_time)}</td>
+          <td class="col-ticket">${ticket}</td>
+          <td>
+            <div class="row-actions">
+              <button class="btn-edit" onclick="openEdit('${esc(s.id)}')">Modifier</button>
+              <button class="btn-del"  onclick="openDelete('${esc(s.id)}')">Supprimer</button>
+            </div>
+          </td>
+        </tr>`;
+    }
+
+    // ── ADD / EDIT MODAL ───────────────────────────────────
+    document.getElementById('btn-add').addEventListener('click', openAdd);
+    document.getElementById('btn-modal-cancel').addEventListener('click', closeModal);
+    document.getElementById('btn-modal-save').addEventListener('click', saveShow);
+
+    function openAdd() {
+      editingId = null;
+      document.getElementById('modal-title').textContent = 'Ajouter un spectacle';
+      document.getElementById('f-title').value  = '';
+      document.getElementById('f-venue').value  = '';
+      document.getElementById('f-date').value   = '';
+      document.getElementById('f-time').value   = '20:00';
+      document.getElementById('f-ticket').value = '';
+      document.getElementById('f-notes').value  = '';
+      modalOverlay.classList.add('open');
+      document.getElementById('f-title').focus();
+    }
+
+    function openEdit(id) {
+      const s = shows.find(x => x.id === id);
+      if (!s) return;
+      editingId = id;
+      document.getElementById('modal-title').textContent = 'Modifier le spectacle';
+      document.getElementById('f-title').value  = s.title;
+      document.getElementById('f-venue').value  = s.venue;
+      document.getElementById('f-date').value   = s.show_date;
+      document.getElementById('f-time').value   = s.show_time.slice(0, 5);
+      document.getElementById('f-ticket').value = s.ticket_url ?? '';
+      document.getElementById('f-notes').value  = s.notes ?? '';
+      modalOverlay.classList.add('open');
+      document.getElementById('f-title').focus();
+    }
+
+    function closeModal() {
+      modalOverlay.classList.remove('open');
+      editingId = null;
+    }
+
+    async function saveShow() {
+      const payload = {
+        title:      document.getElementById('f-title').value.trim(),
+        venue:      document.getElementById('f-venue').value.trim(),
+        show_date:  document.getElementById('f-date').value,
+        show_time:  document.getElementById('f-time').value,
+        ticket_url: document.getElementById('f-ticket').value.trim() || null,
+        notes:      document.getElementById('f-notes').value.trim() || null,
+      };
+
+      if (!payload.title || !payload.venue || !payload.show_date || !payload.show_time) {
+        alert('Veuillez remplir : titre, salle, date et heure.');
+        return;
+      }
+
+      const btn = document.getElementById('btn-modal-save');
+      btn.disabled = true;
+      btn.textContent = 'Enregistrement…';
+
+      let error;
+      if (editingId) {
+        ({ error } = await db.from('shows').update(payload).eq('id', editingId));
+      } else {
+        ({ error } = await db.from('shows').insert(payload));
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Enregistrer';
+
+      if (error) { alert('Erreur : ' + error.message); return; }
+      closeModal();
+      loadShows();
+    }
+
+    // ── DELETE ─────────────────────────────────────────────
+    document.getElementById('btn-confirm-cancel').addEventListener('click', () => {
+      confirmOverlay.classList.remove('open');
+      deletingId = null;
+    });
+
+    document.getElementById('btn-confirm-delete').addEventListener('click', async () => {
+      if (!deletingId) return;
+      const { error } = await db.from('shows').delete().eq('id', deletingId);
+      if (error) { alert('Erreur : ' + error.message); return; }
+      confirmOverlay.classList.remove('open');
+      deletingId = null;
+      loadShows();
+    });
+
+    function openDelete(id) {
+      deletingId = id;
+      confirmOverlay.classList.add('open');
+    }
+
+    // ── CLOSE OVERLAYS ON BACKDROP CLICK ──────────────────
+    modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
+    confirmOverlay.addEventListener('click', e => {
+      if (e.target === confirmOverlay) { confirmOverlay.classList.remove('open'); deletingId = null; }
+    });
+  </script>
+</body>
+</html>
