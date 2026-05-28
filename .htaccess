@@ -1,0 +1,2 @@
+RewriteEngine On
+RewriteRule ^demo2026/?$ https://youtu.be/jIxg_hNIubY [R=302,L]
