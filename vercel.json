@@ -4,6 +4,16 @@
       "source": "/demo2026",
       "destination": "https://youtu.be/jIxg_hNIubY",
       "permanent": false
+    },
+    {
+      "source": "/ecolehumour",
+      "destination": "https://youtu.be/Za8usugx--c",
+      "permanent": false
+    },
+    {
+      "source": "/ecoleconference",
+      "destination": "https://youtu.be/NvU9wDEgpWk",
+      "permanent": false
     }
   ]
 }

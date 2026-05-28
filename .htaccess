@@ -1,2 +1,4 @@
 RewriteEngine On
 RewriteRule ^demo2026/?$ https://youtu.be/jIxg_hNIubY [R=302,L]
+RewriteRule ^ecolehumour/?$ https://youtu.be/Za8usugx--c [R=302,L]
+RewriteRule ^ecoleconference/?$ https://youtu.be/NvU9wDEgpWk [R=302,L]
