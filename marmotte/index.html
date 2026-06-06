@@ -301,6 +301,12 @@
 
     .col-date  { font-weight: 700; color: var(--pink); white-space: nowrap; }
     .col-title { font-weight: 500; }
+    .col-title-complet {
+      color: var(--pink);
+      font-weight: 800;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
     .col-venue { color: var(--gray); font-size: .8rem; }
     .col-time  { color: var(--gray); font-size: .8rem; white-space: nowrap; }
 
@@ -609,6 +615,14 @@
         .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
+    function titleHTML(str) {
+      return String(str ?? '').split(/\b(COMPLET)\b/gi).map(part => (
+        /^complet$/i.test(part)
+          ? '<span class="col-title-complet">COMPLET</span>'
+          : esc(part)
+      )).join('');
+    }
+
     function fmtDate(d) {
       const [y,m,day] = d.split('-');
       return `${parseInt(day)} ${MONTHS[parseInt(m)-1]} ${y}`;
@@ -704,7 +718,7 @@
       return `
         <tr>
           <td class="col-date">${fmtDate(s.show_date)}</td>
-          <td class="col-title">${esc(s.title)}</td>
+          <td class="col-title">${titleHTML(s.title)}</td>
           <td class="col-venue">${esc(s.venue)}</td>
           <td class="col-time">${fmtTime(s.show_time)}</td>
           <td class="col-status">${status}</td>

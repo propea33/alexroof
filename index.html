@@ -302,6 +302,13 @@
       font-size: 1.2rem; font-weight: 700; margin-bottom: 6px;
     }
 
+    .show-title-complet {
+      color: var(--pink);
+      font-weight: 900;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+    }
+
     .show-meta {
       display: flex; flex-wrap: wrap; gap: 16px;
       font-size: .8rem; color: var(--gray);
@@ -1134,6 +1141,14 @@
           .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
       }
 
+      function titleHTML(str) {
+        return String(str ?? '').split(/\b(COMPLET)\b/gi).map(part => (
+          /^complet$/i.test(part)
+            ? '<span class="show-title-complet">COMPLET</span>'
+            : esc(part)
+        )).join('');
+      }
+
       const today = new Date().toISOString().split('T')[0];
       const container = document.getElementById('shows-container');
 
@@ -1172,7 +1187,7 @@
                 <div class="month-year">${monthYear}</div>
               </div>
               <div class="show-info">
-                <h3>${esc(s.title)}</h3>
+                <h3>${titleHTML(s.title)}</h3>
                 <div class="show-meta">${metaHTML}</div>
               </div>
               ${ctaHTML}
