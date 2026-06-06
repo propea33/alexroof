@@ -91,6 +91,83 @@
 
     .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
+    .toggle-field {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 16px 0 8px;
+      padding: 13px 14px;
+      background: rgba(255,255,255,.035);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+
+    .toggle-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .toggle-label {
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: #ff4d55;
+    }
+
+    .toggle-hint {
+      font-size: .72rem;
+      color: var(--gray2);
+    }
+
+    .switch {
+      position: relative;
+      display: inline-flex;
+      width: 48px;
+      height: 26px;
+      flex: 0 0 auto;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .switch-slider {
+      position: absolute;
+      inset: 0;
+      cursor: pointer;
+      background: #2a2a2a;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 999px;
+      transition: background .2s, border-color .2s;
+    }
+
+    .switch-slider::before {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      left: 2px;
+      top: 2px;
+      background: #f4f4f4;
+      border-radius: 50%;
+      transition: transform .2s;
+    }
+
+    .switch input:checked + .switch-slider {
+      background: rgba(255,77,85,.22);
+      border-color: rgba(255,77,85,.75);
+    }
+
+    .switch input:checked + .switch-slider::before {
+      transform: translateX(22px);
+      background: #ff4d55;
+    }
+
     .field-hint {
       font-size: .72rem;
       color: var(--gray2);
@@ -226,6 +303,29 @@
     .col-title { font-weight: 500; }
     .col-venue { color: var(--gray); font-size: .8rem; }
     .col-time  { color: var(--gray); font-size: .8rem; white-space: nowrap; }
+
+    .col-status { white-space: nowrap; }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 78px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.1);
+      color: var(--gray);
+      font-size: .62rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .status-pill.is-soldout {
+      border-color: rgba(255,77,85,.55);
+      background: rgba(255,77,85,.08);
+      color: #ff4d55;
+    }
 
     .col-ticket a {
       color: var(--pink);
@@ -404,6 +504,7 @@
             <th>Titre</th>
             <th>Salle</th>
             <th>Heure</th>
+            <th>État</th>
             <th>Billets</th>
             <th></th>
           </tr>
@@ -422,6 +523,7 @@
             <th>Titre</th>
             <th>Salle</th>
             <th>Heure</th>
+            <th>État</th>
             <th>Billets</th>
             <th></th>
           </tr>
@@ -458,6 +560,16 @@
         <label>URL des billets</label>
         <input type="url" id="f-ticket" placeholder="https://..." />
         <div class="field-hint">Optionnel</div>
+      </div>
+      <div class="toggle-field">
+        <div class="toggle-copy">
+          <div class="toggle-label">Complet</div>
+          <div class="toggle-hint">ON masque le bouton Billets sur le site</div>
+        </div>
+        <label class="switch" aria-label="Marquer le spectacle complet">
+          <input type="checkbox" id="f-complet" />
+          <span class="switch-slider"></span>
+        </label>
       </div>
       <div class="field">
         <label>Note</label>
@@ -574,15 +686,19 @@
 
       bodyUpcoming.innerHTML = upcoming.length
         ? upcoming.map(rowHTML).join('')
-        : '<tr class="empty-row"><td colspan="6">Aucun spectacle à venir</td></tr>';
+        : '<tr class="empty-row"><td colspan="7">Aucun spectacle à venir</td></tr>';
 
       bodyPast.innerHTML = past.length
         ? past.map(rowHTML).join('')
-        : '<tr class="empty-row"><td colspan="6">Aucun spectacle passé</td></tr>';
+        : '<tr class="empty-row"><td colspan="7">Aucun spectacle passé</td></tr>';
     }
 
     function rowHTML(s) {
-      const ticket = s.ticket_url
+      const isSoldOut = s.complet === true;
+      const status = isSoldOut
+        ? '<span class="status-pill is-soldout">Complet</span>'
+        : '<span class="status-pill">Ouvert</span>';
+      const ticket = !isSoldOut && s.ticket_url
         ? `<a href="${esc(s.ticket_url)}" target="_blank" rel="noopener">Voir</a>`
         : '—';
       return `
@@ -591,6 +707,7 @@
           <td class="col-title">${esc(s.title)}</td>
           <td class="col-venue">${esc(s.venue)}</td>
           <td class="col-time">${fmtTime(s.show_time)}</td>
+          <td class="col-status">${status}</td>
           <td class="col-ticket">${ticket}</td>
           <td>
             <div class="row-actions">
@@ -614,6 +731,7 @@
       document.getElementById('f-date').value   = '';
       document.getElementById('f-time').value   = '20:00';
       document.getElementById('f-ticket').value = '';
+      document.getElementById('f-complet').checked = false;
       document.getElementById('f-notes').value  = '';
       modalOverlay.classList.add('open');
       document.getElementById('f-title').focus();
@@ -629,6 +747,7 @@
       document.getElementById('f-date').value   = s.show_date;
       document.getElementById('f-time').value   = s.show_time.slice(0, 5);
       document.getElementById('f-ticket').value = s.ticket_url ?? '';
+      document.getElementById('f-complet').checked = s.complet === true;
       document.getElementById('f-notes').value  = s.notes ?? '';
       modalOverlay.classList.add('open');
       document.getElementById('f-title').focus();
@@ -646,6 +765,7 @@
         show_date:  document.getElementById('f-date').value,
         show_time:  document.getElementById('f-time').value,
         ticket_url: document.getElementById('f-ticket').value.trim() || null,
+        complet:    document.getElementById('f-complet').checked,
         notes:      document.getElementById('f-notes').value.trim() || null,
       };
 
